@@ -117,7 +117,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 			return json([]);
 		}
 
-		// Banners endpoint  
+		// Banners endpoint
 		if (url.pathname === '/api/v1/banners' || url.pathname === '/api/v1/configs/banners') {
 			return json([]);
 		}
