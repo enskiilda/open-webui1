@@ -1,8 +1,8 @@
-# Open WebUI
+# Open WebUI - Frontend Only Version
 
 ## Overview
 
-Open WebUI is a comprehensive web-based user interface for interacting with AI language models. Built with SvelteKit 5, it provides a feature-rich chat interface with support for multiple AI providers (Ollama, OpenAI-compatible APIs), knowledge management, tools/functions, and extensive customization options. The application is designed as a Single Page Application (SPA) with static site generation for optimal performance.
+Open WebUI is a comprehensive web-based user interface for interacting with AI language models. Built with SvelteKit 5, it provides a feature-rich chat interface. **This is a frontend-only version** that runs entirely in the browser without a backend server.
 
 ## User Preferences
 
@@ -38,11 +38,6 @@ Preferred communication style: Simple, everyday language.
 - **i18next-parser**: Extraction tool for translation keys
 - Dynamic locale loading from `src/lib/i18n/locales/{locale}/translation.json`
 - Decision: i18next provides mature i18n capabilities with good TypeScript support and community ecosystem.
-
-**Real-time Communication**
-- **Socket.io Client**: WebSocket connections for live updates and active user tracking
-- **EventSource**: Server-Sent Events for streaming chat responses
-- Decision: Socket.io for bidirectional communication, SSE for unidirectional streaming of AI responses.
 
 ### Styling & Theming
 
@@ -82,33 +77,14 @@ Preferred communication style: Simple, everyday language.
 - ONNX Runtime Web: Optimized neural network execution
 - Support for multiple model backends (WebGPU, WASM)
 
-### Authentication & Authorization
-
-**OAuth Integration**
-- **@azure/msal-browser**: Microsoft Authentication Library for OneDrive/SharePoint
-- Google Drive API: OAuth flow for file picker
-- Session-based authentication with JWT tokens
-- Decision: MSAL provides robust Microsoft identity platform integration; separate OAuth implementations for each provider maintain flexibility.
-
-**Access Control**
-- Role-based permissions (read/write)
-- Group and user-level access controls
-- Public/private sharing modes
-
 ### Data Management
 
-**Knowledge Base**
-- Document upload and indexing
-- RAG (Retrieval-Augmented Generation) support via retrieval API
-- File metadata tracking and versioning
-- Decision: Knowledge management is API-driven, allowing backend flexibility.
-
 **Chat & Conversation Management**
-- Local chat history storage
+- Local chat history storage (browser-based)
 - Folder organization for chats
 - Tags and categorization system
 - Export/import functionality
-- Decision: Client-side storage with backend sync enables offline capabilities.
+- Decision: Client-side storage enables offline capabilities and privacy.
 
 ### Code Features
 
@@ -118,15 +94,6 @@ Preferred communication style: Simple, everyday language.
 - Code block copying functionality
 - Elixir and HCL language support
 - Decision: CodeMirror 6 provides modern, extensible code editing with better performance than legacy editors.
-
-### Workflow & Automation
-
-**Tools & Functions**
-- Custom tool/function creation and management
-- OpenAPI specification support
-- Tool valves (parameters) configuration
-- Server-side tool execution
-- Decision: Tools are defined on the backend but managed through the UI for flexibility.
 
 ### Development & Build
 
@@ -144,66 +111,41 @@ Preferred communication style: Simple, everyday language.
 - Asset optimization and code splitting
 - Version polling for update detection (60-second interval)
 
-## External Dependencies
+## Frontend-Only Mode
 
-### Third-Party APIs
+### API Handling
 
-**AI Model Providers**
-- Ollama API: Local model inference
-- OpenAI-compatible APIs: External model providers
-- NVIDIA API: Integrated via standalone Hono backend server
-  - Supported models: nvidia:moonshotai/kimi-k2-instruct-0905, nvidia:deepseek-ai/deepseek-v3.1, nvidia:bytedance/seed-oss-36b-instruct, nvidia:openai/gpt-oss-120b
-  - Implementation: Hono API endpoints (backend/server.ts) proxy to NVIDIA API
-  - API key hardcoded in backend/server.ts
-  - Streaming support via SSE
-- Custom API base URLs configurable per deployment
+In this frontend-only version, all API requests are handled by SvelteKit hooks (`src/hooks.server.ts`) that return mock/stub responses. This allows the UI to function without a backend server.
 
-### Hono Backend (Standalone Server)
+**Key Features in Frontend-Only Mode:**
+- ✅ UI fully functional with all components
+- ✅ Local chat history in browser storage
+- ✅ Client-side file processing
+- ✅ Client-side TTS (Kokoro-JS)
+- ✅ Internationalization (i18n)
+- ✅ Theme switching
+- ❌ No actual AI model inference (requires external API connection)
+- ❌ No server-side data persistence
+- ❌ No authentication/authorization
+- ❌ No image generation
+- ❌ No web search
 
-**Hono API Server** (port 3000)
-- **Framework**: Hono with @hono/node-server
-- **Location**: backend/server.ts
-- **Endpoints**:
-  - GET /health - Health check
-  - GET /api/models - List available NVIDIA models
-  - GET /api/v1/config - App configuration (features, locale, default models)
-  - GET /api/v1/users/me - Current user info
-  - POST /api/chat/completions - Streaming chat completions proxy
-- **Streaming**: Uses native fetch with SSE streaming via hono/streaming
-- **Architecture**: Standalone server with CORS enabled
-- **Port**: 3000 (separate from frontend on port 5000)
-- **Vite Proxy**: Frontend proxies /api/* and /health requests to backend via Vite dev server
+### Connecting to External APIs
 
-**Cloud Storage Integration**
-- Google Drive API: File selection and upload
-- Microsoft OneDrive API: Personal and business accounts via MSAL
-- SharePoint: Document library access
+To enable AI chat functionality, you can configure external API connections:
+- OpenAI-compatible APIs
+- Ollama (local installation)
+- Other LLM providers
 
-**Audio Services**
-- Audio API endpoint: `/api/v1/audio`
-- TTS generation and processing
+Configure these in the application settings once running.
 
-### Backend Services
-
-**Core API Endpoints**
-- WebUI API: `/api/v1/*` - Primary application API
-- Models API: `/api/models/*` - Model management
-- Retrieval API: `/api/v1/retrieval` - Knowledge base queries
-- Images API: `/api/v1/images` - Image generation and processing
-
-### Databases & Storage
-
-**Note**: The application expects a backend API to handle data persistence. Based on the environment variables (`DATABASE_URL`, `PGPORT`, `PGPASSWORD`), PostgreSQL may be used by the backend, but the frontend is database-agnostic and communicates exclusively through REST APIs.
-
-### External Libraries
+## External Libraries
 
 **Utilities**
 - uuid (v4): Unique identifier generation
 - js-sha256: Cryptographic hashing
 - dayjs: Date/time manipulation with localization
 - yaml: YAML parsing for configurations
-- devalue: Serialization for SSR/SPA data transfer
-- async: Asynchronous flow control
 - file-saver: Client-side file downloads
 - dompurify: XSS protection for HTML sanitization
 - marked: Markdown parsing and rendering
@@ -218,3 +160,22 @@ Preferred communication style: Simple, everyday language.
 - i18next-parser: Translation key extraction
 - eslint + prettier: Code quality tools
 - sass-embedded: SASS compilation
+
+## Running the Application
+
+```bash
+cd vite-main
+npm install --legacy-peer-deps
+npm run dev
+```
+
+The application will be available at http://localhost:5000
+
+## Building for Production
+
+```bash
+cd vite-main
+npm run build
+```
+
+The static build will be in `vite-main/build` directory, ready for deployment to any static hosting service.
